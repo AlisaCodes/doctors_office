@@ -2,6 +2,7 @@ class Patient
   attr_reader(:name, :birthdate, :id)
 
   @@patients = []
+  patient = []
 
   define_method(:initialize) do |attributes|
     @name = attributes.fetch(:name)
@@ -10,7 +11,10 @@ class Patient
   end
 
   define_method(:save) do
-    @@patients.push(self)
+    # @@patients.push(self)
+
+    result = DB.exec("INSERT INTO patient (name) VALUES ('#{@name}') RETURNING id;")
+    @id = result.first().fetch("id").to_i()
   end
 
   define_singleton_method(:clear) do
@@ -18,6 +22,18 @@ class Patient
   end
 
   define_singleton_method(:all) do
-    @@patients
+    # @@patients
+    returned_patients = DB.exec("SELECT * FROM patient;")
+    patients = []
+    returned_patients.each() do |patient|
+      name = patient.fetch("name")
+      id = patient.fetch("id").to_i()
+      patients.push(Patient.new({:name => name, :id => id}))
+    end
+    patients
+  end
+
+  define_method(:==) do |another_patient|
+    self.name().==(another_patient.name()).&(self.id().==(another_patient.id()))
   end
 end

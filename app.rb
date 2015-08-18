@@ -3,6 +3,9 @@ require('sinatra/reloader')
 require('./lib/doctor.rb')
 require('./lib/patient.rb')
 also_reload('lib/**/*.rb')
+require("pg")
+
+DB = PG.connect({:dbname => "doctor"})
 
 get("/") do
   @doctors = Doctor.all()
